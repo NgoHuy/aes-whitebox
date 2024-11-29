@@ -280,7 +280,7 @@ void GenerateXorTable(FILE* out, int Nr) {
         for (int j = 0; j < 16; j++)
           Xor[r][n][i][j] = i ^ j;
 
-  fprintf(out, "constexpr uint8_t Xor[%d][96][16][16] = {\n", Nr-1);
+  fprintf(out, "const uint8_t Xor[%d][96][16][16] = {\n", Nr-1);
   for (int r = 0; r < Nr-1; r++) {
     fprintf(out, "  {\n");
     for (int n = 0; n < 96; n++) {
@@ -305,7 +305,7 @@ void GenerateEncryptingTables(FILE* out, uint32_t* roundKey, int Nr) {
 
   CalculateTyBoxes(roundKey, Tyboxes, TboxesLast, MBL, true, true, Nr);
 
-  fprintf(out, "constexpr uint32_t Tyboxes[%d][16][256] = {\n", Nr-1);
+  fprintf(out, "const uint32_t Tyboxes[%d][16][256] = {\n", Nr-1);
   for (int r = 0; r < Nr-1; r++) {
     fprintf(out, "  {\n");
     for (int i = 0; i < 16; i++) {
@@ -327,7 +327,7 @@ void GenerateEncryptingTables(FILE* out, uint32_t* roundKey, int Nr) {
   }
   fprintf(out, "};\n\n");
 
-  fprintf(out, "constexpr uint8_t TboxesLast[16][256] = {\n");
+  fprintf(out, "const uint8_t TboxesLast[16][256] = {\n");
   for (int i = 0; i < 16; i++) {
     fprintf(out, "  {\n");
     for (int x = 0; x < 256; x++) {
@@ -343,7 +343,7 @@ void GenerateEncryptingTables(FILE* out, uint32_t* roundKey, int Nr) {
   }
   fprintf(out, "};\n\n");
 
-  fprintf(out, "constexpr uint32_t MBL[%d][16][256] = {\n", Nr-1);
+  fprintf(out, "const uint32_t MBL[%d][16][256] = {\n", Nr-1);
   for (int r = 0; r < Nr-1; r++) {
     fprintf(out, "  {\n");
     for (int i = 0; i < 16; i++) {
@@ -378,15 +378,24 @@ void GenerateTables(const char* hexKey, int Nk, int Nr) {
   fprintf(out,
       "// This file is generated, do not edit.\n"
       "\n"
-      "namespace {\n"
+      "#ifdef __cplusplus"
       "\n"
-      "constexpr int Nr = %d;\n"
+      "namespace {\n"
+      "#endif"
+      "\n"
+      "const int Nr = %d;\n"
       "\n", Nr);
 
   GenerateXorTable(out, Nr);
   GenerateEncryptingTables(out, roundKey, Nr);
 
-  fprintf(out, "}  // namespace");
+  fprintf(out,
+      "\n"
+      "#ifdef __cplusplus"
+      "\n"
+      "}  // namespace"
+      "\n"
+      "#endif");
 
   fflush(out);
   fclose(out);
